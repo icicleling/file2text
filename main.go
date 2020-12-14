@@ -5,15 +5,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"mime"
 	"os"
+	"path"
 )
 
 func main() {
-	path := os.Args[1]
-	byte, err := ioutil.ReadFile(path)
+	pathStr := os.Args[1]
+	ext := path.Ext(pathStr)
+	byte, err := ioutil.ReadFile(pathStr)
 	if err != nil {
-		log.Fatal("err:", err)
+		log.Fatal(err)
 	}
-	str := base64.StdEncoding.EncodeToString(byte)
-	fmt.Print(str)
+
+	base64Str := base64.StdEncoding.EncodeToString(byte)
+	mimeType := mime.TypeByExtension(ext)
+
+	fmt.Printf("data:%s;base64,%s", mimeType, base64Str)
 }
