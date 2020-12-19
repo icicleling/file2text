@@ -12,7 +12,7 @@ import (
 )
 
 // VERSION 版本号
-const VERSION = "0.2"
+const VERSION = "0.3"
 
 func main() {
 	versionFlag := flag.Bool("version", false, "版本号")
