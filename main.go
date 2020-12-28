@@ -17,6 +17,7 @@ const VERSION = "0.3"
 func main() {
 	versionFlag := flag.Bool("version", false, "版本号")
 	dataurlFlag := flag.Bool("dataurl", false, "输出data url")
+	reverseFlag := flag.Bool("reverse", false, "反转, 把base64字符串输出为文件")
 	flag.Parse()
 
 	// 没有任何参数
@@ -51,6 +52,17 @@ func main() {
 		os.Exit(0)
 	}
 
+	// reverse flag
+	if *reverseFlag {
+		base64Str := flag.Arg(0)
+		filePath := flag.Arg(1)
+		result, err := base64.StdEncoding.DecodeString(base64Str)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ioutil.WriteFile(filePath, result, 0666)
+	}
+
 	// version flag
 	if *versionFlag {
 		fmt.Printf("v%s\n", VERSION)
@@ -58,7 +70,7 @@ func main() {
 	}
 }
 
-// 读取路径文件转换为base64字符串后返回base64字符串
+// 读取路径文件转换后, 返回base64字符串
 func getBase64(pathStr string) (string, error) {
 	byte, err := ioutil.ReadFile(pathStr)
 	if err != nil {
