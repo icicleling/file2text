@@ -12,7 +12,7 @@ import (
 )
 
 // VERSION 版本号
-const VERSION = "0.3"
+const VERSION = "0.4"
 
 // USAGE help说明文本
 const USAGE = `
