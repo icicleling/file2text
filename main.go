@@ -12,17 +12,41 @@ import (
 )
 
 // VERSION 版本号
-const VERSION = "0.3"
+const VERSION = "0.4"
+
+// USAGE help说明文本
+const USAGE = `
+转换并打印base64字符串
+	img2base64 <path>
+
+flag:
+	-dataurl <path>
+		输出dataurl
+
+	-reverse [-path|-text] <base64-string|base64filepath> <filepath>
+		反转base64字符串为文件, 输入字符串或路径, 默认为字符串
+		注意命令行是有长度限制的, 不同终端限制长度不同
+
+	-version
+		打印版本号
+`
 
 func main() {
+	flag.Usage = func() {
+		fmt.Print(USAGE)
+	}
+
 	versionFlag := flag.Bool("version", false, "版本号")
 	dataurlFlag := flag.Bool("dataurl", false, "输出data url")
+	reverseFlag := flag.Bool("reverse", false, "反转, 把base64字符串输出为文件")
+	pathFlag := flag.String("path", "", "文本文件路径")
+	textFlag := flag.String("text", "", "base64字符串")
 	flag.Parse()
 
 	// 没有任何参数
 	if len(os.Args) == 1 {
 		flag.PrintDefaults()
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	// 没有flag 有其他参数
@@ -51,6 +75,32 @@ func main() {
 		os.Exit(0)
 	}
 
+	// reverse flag
+	if *reverseFlag {
+		var base64Str string
+		var filePath string
+		if *pathFlag != "" {
+			byte, err := ioutil.ReadFile(*pathFlag)
+			if err != nil {
+				log.Fatal(err)
+			}
+			base64Str = string(byte)
+			filePath = flag.Arg(0)
+		} else if *textFlag != "" {
+			base64Str = *textFlag
+			filePath = flag.Arg(0)
+		} else {
+			base64Str = flag.Arg(0)
+			filePath = flag.Arg(1)
+		}
+
+		result, err := base64.StdEncoding.DecodeString(base64Str)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ioutil.WriteFile(filePath, result, 0666)
+	}
+
 	// version flag
 	if *versionFlag {
 		fmt.Printf("v%s\n", VERSION)
@@ -58,7 +108,7 @@ func main() {
 	}
 }
 
-// 读取路径文件转换为base64字符串后返回base64字符串
+// 读取路径文件转换后, 返回base64字符串
 func getBase64(pathStr string) (string, error) {
 	byte, err := ioutil.ReadFile(pathStr)
 	if err != nil {
