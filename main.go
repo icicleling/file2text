@@ -9,6 +9,7 @@ import (
 	"mime"
 	"os"
 	"path"
+	"regexp"
 )
 
 // VERSION 版本号
@@ -23,9 +24,10 @@ flag:
 	-dataurl <path>
 		输出dataurl
 
-	-reverse [-path|-text] <base64-string|base64filepath> <filepath>
+	-reverse [-path|-text] <base64-string|base64filepath> [filepath]
 		反转base64字符串为文件, 输入字符串或路径, 默认为字符串
 		注意命令行是有长度限制的, 不同终端限制长度不同
+		不写filepath的话, -text默认输出名为'output'的文件, -path默认输出去掉后缀的同名文件
 
 	-version
 		打印版本号
@@ -77,21 +79,38 @@ func main() {
 
 	// reverse flag
 	if *reverseFlag {
-		var base64Str string
-		var filePath string
+		base64Str := ""
+		filePath := "./output"
 		if *pathFlag != "" {
 			byte, err := ioutil.ReadFile(*pathFlag)
 			if err != nil {
 				log.Fatal(err)
 			}
 			base64Str = string(byte)
-			filePath = flag.Arg(0)
+
+			if flag.Arg(0) != "" {
+				filePath = flag.Arg(0)
+			} else {
+				reg := regexp.MustCompile(`([^/\\\n]+)(?:\.[^/\\\n]+$)|([^/\\][^/\\\n.]+$)`)
+				matchArr := reg.FindStringSubmatch(*pathFlag)
+				hasExt := matchArr[1]
+				noExt := matchArr[2]
+				if hasExt != "" {
+					filePath = "./" + hasExt
+				} else if noExt != "" {
+					filePath = "./" + noExt
+				}
+			}
 		} else if *textFlag != "" {
 			base64Str = *textFlag
-			filePath = flag.Arg(0)
+			if flag.Arg(0) != "" {
+				filePath = flag.Arg(0)
+			}
 		} else {
 			base64Str = flag.Arg(0)
-			filePath = flag.Arg(1)
+			if flag.Arg(1) != "" {
+				filePath = flag.Arg(1)
+			}
 		}
 
 		result, err := base64.StdEncoding.DecodeString(base64Str)
