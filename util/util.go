@@ -6,7 +6,7 @@ import (
 )
 
 // 读取路径文件转换后, 返回base64字符串
-func GetBase64(pathStr string) (string, error) {
+func GetBase64ByFilePath(pathStr string) (string, error) {
 	byte, err := ioutil.ReadFile(pathStr)
 	if err != nil {
 		return "", err
