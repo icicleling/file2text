@@ -13,7 +13,7 @@ import (
 func DataUrlFlag() {
 	pathStr := flag.Arg(0)
 	ext := path.Ext(pathStr)
-	base64Str, err := util.GetBase64(pathStr)
+	base64Str, err := util.GetBase64ByFilePath(pathStr)
 	if err != nil {
 		log.Fatal(err)
 	}

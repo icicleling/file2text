@@ -15,6 +15,7 @@ func main() {
 	}
 
 	versionFlag := flag.Bool("version", false, "版本号")
+	outputFlag := flag.Bool("output", false, "输出文件")
 	dataurlFlag := flag.Bool("dataurl", false, "输出data url")
 	reverseFlag := flag.Bool("reverse", false, "反转, 把base64字符串输出为文件")
 	pathFlag := flag.String("path", "", "文本文件路径")
@@ -31,11 +32,16 @@ func main() {
 	// 没有flag 有其他参数
 	if flag.NFlag() == 0 {
 		pathStr := flag.Arg(0)
-		base64Str, err := util.GetBase64(pathStr)
+		base64Str, err := util.GetBase64ByFilePath(pathStr)
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println(base64Str)
+	}
+
+	// output flag
+	if *outputFlag {
+		OutputFlag()
 	}
 
 	// dataurl flag
