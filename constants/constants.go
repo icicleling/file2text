@@ -13,7 +13,7 @@ flag:
 		输出dataurl
 
 	-reverse [-path|-text] <base64-string|base64filepath> [target-filepath]
-		反转base64字符串为文件, 输入字符串或路径, 默认为字符串
+		反转base64字符串为文件, 输入路径(path)或字符串(text), 默认为path
 		注意命令行是有长度限制的, 不同终端限制长度不同
 		不写filepath的话, -text默认输出名为'output'的文件, -path默认输出去掉后缀的同名文件
 

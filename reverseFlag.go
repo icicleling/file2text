@@ -40,9 +40,25 @@ func ReverseFlag(pathFlag *string, textFlag *string) {
 			filePath = flag.Arg(0)
 		}
 	} else {
-		base64Str = flag.Arg(0)
+		pathStr := flag.Arg(0)
+		byte, err := ioutil.ReadFile(pathStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		base64Str = string(byte)
+
 		if flag.Arg(1) != "" {
 			filePath = flag.Arg(1)
+		} else {
+			reg := regexp.MustCompile(`([^/\\\n]+)(?:\.[^/\\\n]+$)|([^/\\][^/\\\n.]+$)`)
+			matchArr := reg.FindStringSubmatch(pathStr)
+			hasExt := matchArr[1]
+			noExt := matchArr[2]
+			if hasExt != "" {
+				filePath = "./" + hasExt
+			} else if noExt != "" {
+				filePath = "./" + noExt
+			}
 		}
 	}
 
