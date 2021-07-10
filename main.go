@@ -41,12 +41,7 @@ func main() {
 
 	// output flag
 	if *outputFlag {
-		OutputFlag()
-	}
-
-	// dataurl flag
-	if *dataurlFlag {
-		DataUrlFlag()
+		OutputFlag(dataurlFlag)
 	}
 
 	// reverse flag

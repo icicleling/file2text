@@ -6,20 +6,19 @@ const USAGE = `
 	img2base64 <path>
 
 flag:
-	-output <filepath> [target-filepath]
-		转换后的文本输出一个文本文件, 默认为filename.ext.txt
-
-	-dataurl <filepath>
-		输出dataurl
+	-output [--dataurl] <filepath> [target-filepath]
+		转换文件为文本文件, 输出文件名格式为 filename.ext.txt
+		--dataurl 输出dataurl
 
 	-reverse [-path|-text] <base64-string|base64filepath> [target-filepath]
-		反转base64字符串为文件, 输入字符串或路径, 默认为字符串
+		反转base64字符串为文件
+		--path 默认值, 从读取路径的文件, 输出去掉后缀的同名文件
+		--text 读取命令行输入的文本, 输出名为'output'的文件
 		注意命令行是有长度限制的, 不同终端限制长度不同
-		不写filepath的话, -text默认输出名为'output'的文件, -path默认输出去掉后缀的同名文件
 
 	-version
 		打印版本号
 `
 
 // VERSION 版本号
-const VERSION = "0.6"
+const VERSION = "0.7"
