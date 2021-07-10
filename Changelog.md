@@ -1,5 +1,10 @@
 # 更新日志
 
+## 0.7
+- feat: 
+  - 修改--release默认行为
+  - dataurl选项移入output子选项
+
 ## 0.6
 - feat: 添加 --output 输出结果到文本文件
 
@@ -16,8 +21,9 @@
 
 ## 0.4
 
-- feat: 更好的 help 显示文档
-- feat: 参数-reverse, 把 base64 字符串反转回文件
+- feat: 
+  - 更好的 help 显示文档
+  - 参数-reverse, 把 base64 字符串反转回文件
 
 ## 0.3.1
 
@@ -25,10 +31,11 @@
 
 ## 0.3
 
-- feat: 增加参数 -version -dataurl
-  - -version 打印版本号
-  - -dataurl 输出 dataurl 格式的 base64 字符串
-- feat: 默认打印纯 base64 字符串
+- feat: 
+  - 增加参数 -version -dataurl
+    - -version 打印版本号
+    - -dataurl 输出 dataurl 格式的 base64 字符串
+  - 默认打印纯 base64 字符串
 
 ## 0.2
 
