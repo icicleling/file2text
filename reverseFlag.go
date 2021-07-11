@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/base64"
-	"flag"
 	"io/ioutil"
 	"log"
 	"regexp"
+
+	flag "github.com/spf13/pflag"
 )
 
 func ReverseFlag(pathFlag *string, textFlag *string) {

@@ -1,12 +1,13 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"img2base64/constants"
 	"img2base64/util"
 	"log"
 	"os"
+
+	flag "github.com/spf13/pflag"
 )
 
 func main() {
@@ -14,10 +15,10 @@ func main() {
 		fmt.Print(constants.USAGE)
 	}
 
-	versionFlag := flag.Bool("version", false, "版本号")
-	outputFlag := flag.Bool("output", false, "输出文件")
+	versionFlag := flag.BoolP("version", "v", false, "版本号")
+	outputFlag := flag.BoolP("output", "o", false, "输出文件")
 	dataurlFlag := flag.Bool("dataurl", false, "输出data url")
-	reverseFlag := flag.Bool("reverse", false, "反转, 把base64字符串输出为文件")
+	reverseFlag := flag.BoolP("reverse", "r", false, "反转, 把base64字符串输出为文件")
 	pathFlag := flag.String("path", "", "文本文件路径")
 	textFlag := flag.String("text", "", "base64字符串")
 
