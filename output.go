@@ -6,14 +6,13 @@ import (
 	"io/ioutil"
 	"log"
 	"mime"
-	"os"
 	"path"
 	"regexp"
 
 	flag "github.com/spf13/pflag"
 )
 
-func OutputFlag(dataUrlFlag *bool) {
+func Output(dataUrlFlag *bool, printFlag *bool) {
 	originPathStr := flag.Arg(0)
 	targetPathStr := flag.Arg(1)
 
@@ -29,11 +28,14 @@ func OutputFlag(dataUrlFlag *bool) {
 		log.Fatal(err)
 	}
 
-	if *dataUrlFlag == true {
+	if *dataUrlFlag {
 		ext := path.Ext(originPathStr)
 		mimeType := mime.TypeByExtension(ext)
 		base64Str = fmt.Sprintf("data:%s;base64,%s\n", mimeType, base64Str)
 	}
+	if *printFlag {
+		fmt.Println(base64Str)
+		return
+	}
 	ioutil.WriteFile(targetPathStr, []byte(base64Str), 0666)
-	os.Exit(0)
 }

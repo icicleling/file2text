@@ -9,7 +9,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-func ReverseFlag(pathFlag *string, textFlag *string) {
+func Reverse(pathFlag *string, textFlag *string) {
 	base64Str := ""
 	filePath := "./output"
 
