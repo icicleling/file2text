@@ -3,7 +3,7 @@
 ``` bash
 git clone https://github.com/icicleling/img2base64.git
 go install
-img2base64 ./foo.jpg # 打印base64字符串
+img2base64 ./foo.jpg # output file ./foo.jpg.txt
 ```
 
 ``` bash
