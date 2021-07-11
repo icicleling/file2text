@@ -1,12 +1,13 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"img2base64/constants"
 	"img2base64/util"
 	"log"
 	"os"
+
+	flag "github.com/spf13/pflag"
 )
 
 func main() {

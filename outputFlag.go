@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"img2base64/util"
 	"io/ioutil"
@@ -10,6 +9,8 @@ import (
 	"os"
 	"path"
 	"regexp"
+
+	flag "github.com/spf13/pflag"
 )
 
 func OutputFlag(dataUrlFlag *bool) {
