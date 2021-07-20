@@ -15,11 +15,11 @@ func main() {
 
 	versionFlag := flag.BoolP("version", "v", false, "版本号")
 
-	dataurlFlag := flag.Bool("dataurl", false, "输出data url")
+	dataurlFlag := flag.Bool("dataurl", false, "转换为data url")
 	printFlag := flag.Bool("print", false, "打印到终端")
+	binFlag := flag.Bool("bin", false, "转换为二进制字符串")
 
 	reverseFlag := flag.BoolP("reverse", "r", false, "反转, 把base64字符串输出为文件")
-	pathFlag := flag.String("path", "", "文本文件路径")
 	textFlag := flag.String("text", "", "base64字符串")
 
 	flag.Parse()
@@ -32,7 +32,7 @@ func main() {
 
 	// reverse flag
 	if *reverseFlag {
-		Reverse(pathFlag, textFlag)
+		Reverse(textFlag, binFlag)
 		os.Exit(0)
 	}
 
@@ -43,6 +43,6 @@ func main() {
 	}
 
 	// no flag
-	Output(dataurlFlag, printFlag)
+	Output(dataurlFlag, printFlag, binFlag)
 	os.Exit(0)
 }
