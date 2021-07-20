@@ -1,8 +1,8 @@
 package main
 
 import (
+	"file2text/constants"
 	"fmt"
-	"img2base64/constants"
 	"os"
 
 	flag "github.com/spf13/pflag"

@@ -3,11 +3,11 @@ package constants
 // USAGE help说明文本
 const USAGE = `
 基本:
-	img2base64 <filepath>
+	file2text <filepath>
 	转换文件为文本文件, 在当前目录下输出文件, 格式为 filename.ext.txt
 
 用法:
-	img2base64 [--dataurl|--bin] [--print] <filepath> [target-filepath]
+	file2text [--dataurl|--bin] [--print] <filepath> [target-filepath]
 		--dataurl 输出dataurl
 		--bin 输出二进制字符串
 		--print 打印到终端
