@@ -1,8 +1,8 @@
 package main
 
 import (
+	"file2text/util"
 	"fmt"
-	"img2base64/util"
 	"io/ioutil"
 	"log"
 	"mime"

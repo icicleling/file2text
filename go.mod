@@ -1,4 +1,4 @@
-module img2base64
+module file2text
 
 go 1.15
 
