@@ -20,7 +20,7 @@ func Output(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 
 	if targetPathStr == "" {
 		reg := regexp.MustCompile(`[^/\\\n]+$`)
-		matchArr := reg.FindStringSubmatch(*&originPathStr)
+		matchArr := reg.FindStringSubmatch(originPathStr)
 		fileName := matchArr[0]
 		targetPathStr = "./" + fileName + ".txt"
 	}
