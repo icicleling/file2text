@@ -20,7 +20,7 @@ func Output(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 
 	if targetPathStr == "" {
 		reg := regexp.MustCompile(`[^/\\\n]+$`)
-		matchArr := reg.FindStringSubmatch(*&originPathStr)
+		matchArr := reg.FindStringSubmatch(originPathStr)
 		fileName := matchArr[0]
 		targetPathStr = "./" + fileName + ".txt"
 	}
@@ -30,11 +30,11 @@ func Output(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		str := ""
+		var stringBuilder strings.Builder
 		for i := 0; i < len(byteArr); i++ {
-			str += fmt.Sprintf("%b ", byteArr[i])
+			stringBuilder.WriteString(fmt.Sprintf("%b ", byteArr[i]))
 		}
-		resultStr = strings.TrimSpace(str)
+		resultStr = strings.TrimSpace(stringBuilder.String())
 	} else {
 		base64Str, err := util.GetBase64ByFilePath(originPathStr)
 		if err != nil {
