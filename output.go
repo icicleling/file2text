@@ -3,9 +3,9 @@ package main
 import (
 	"file2text/util"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"mime"
+	"os"
 	"path"
 	"regexp"
 	"strings"
@@ -53,5 +53,5 @@ func Output(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 		fmt.Println(resultStr)
 		return
 	}
-	ioutil.WriteFile(targetPathStr, []byte(resultStr), 0666)
+	os.WriteFile(targetPathStr, []byte(resultStr), 0666)
 }

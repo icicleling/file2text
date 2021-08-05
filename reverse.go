@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/base64"
-	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,7 +23,7 @@ func Reverse(textFlag *string, binFlag *bool) {
 		}
 	} else {
 		pathStr := flag.Arg(0)
-		byteArr, err := ioutil.ReadFile(pathStr)
+		byteArr, err := os.ReadFile(pathStr)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -62,5 +62,5 @@ func Reverse(textFlag *string, binFlag *bool) {
 		resultByte = result
 	}
 
-	ioutil.WriteFile(filePath, resultByte, 0666)
+	os.WriteFile(filePath, resultByte, 0666)
 }
