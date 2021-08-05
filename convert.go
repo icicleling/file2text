@@ -13,7 +13,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-func Output(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
+func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 	originPathStr := flag.Arg(0)
 	targetPathStr := flag.Arg(1)
 	resultStr := ""

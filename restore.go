@@ -11,7 +11,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-func Reverse(textFlag *string, binFlag *bool) {
+func Restore(textFlag *string, binFlag *bool) {
 	originStr := ""
 	filePath := "./output"
 	resultByte := make([]byte, 0)
