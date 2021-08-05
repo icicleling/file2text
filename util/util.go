@@ -2,12 +2,12 @@ package util
 
 import (
 	"encoding/base64"
-	"io/ioutil"
+	"os"
 )
 
 // 读取路径文件, 返回base64字符串
 func GetBase64ByFilePath(pathStr string) (string, error) {
-	byte, err := ioutil.ReadFile(pathStr)
+	byte, err := os.ReadFile(pathStr)
 	if err != nil {
 		return "", err
 	}
@@ -17,7 +17,7 @@ func GetBase64ByFilePath(pathStr string) (string, error) {
 
 // 读取路径文件, 返回byte
 func GetByteByFilePath(pathStr string) ([]byte, error) {
-	byte, err := ioutil.ReadFile(pathStr)
+	byte, err := os.ReadFile(pathStr)
 	if err != nil {
 		return nil, err
 	}

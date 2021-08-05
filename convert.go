@@ -3,9 +3,9 @@ package main
 import (
 	"file2text/util"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"mime"
+	"os"
 	"path"
 	"regexp"
 	"strings"
@@ -13,7 +13,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-func Output(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
+func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 	originPathStr := flag.Arg(0)
 	targetPathStr := flag.Arg(1)
 	resultStr := ""
@@ -53,5 +53,5 @@ func Output(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 		fmt.Println(resultStr)
 		return
 	}
-	ioutil.WriteFile(targetPathStr, []byte(resultStr), 0666)
+	os.WriteFile(targetPathStr, []byte(resultStr), 0666)
 }

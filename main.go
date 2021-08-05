@@ -19,7 +19,7 @@ func main() {
 	printFlag := flag.Bool("print", false, "打印到终端")
 	binFlag := flag.Bool("bin", false, "转换为二进制字符串")
 
-	reverseFlag := flag.BoolP("reverse", "r", false, "反转, 把base64字符串输出为文件")
+	restoreFlag := flag.BoolP("restore", "r", false, "反转, 把base64字符串输出为文件")
 	textFlag := flag.String("text", "", "base64字符串")
 
 	flag.Parse()
@@ -30,9 +30,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	// reverse flag
-	if *reverseFlag {
-		Reverse(textFlag, binFlag)
+	// restore flag
+	if *restoreFlag {
+		Restore(textFlag, binFlag)
 		os.Exit(0)
 	}
 
@@ -43,6 +43,6 @@ func main() {
 	}
 
 	// no flag
-	Output(dataurlFlag, printFlag, binFlag)
+	Convert(dataurlFlag, printFlag, binFlag)
 	os.Exit(0)
 }

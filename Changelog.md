@@ -1,5 +1,10 @@
 # 更新日志
 
+## 0.11
+- feat: 
+  - go mod 更新go版本到1.16, ioutil换成os
+  - reverse命令改名为restore
+
 ## 0.10.1
 
 - feat: 使用 strings.builder 拼接字符串, 极大幅优化了转换二进制字符串的性能
