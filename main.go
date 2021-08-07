@@ -4,11 +4,17 @@ import (
 	"file2text/constants"
 	"fmt"
 	"os"
+	"time"
 
 	flag "github.com/spf13/pflag"
 )
 
 func main() {
+	startTime := time.Now()
+	defer func() {
+		fmt.Println(time.Since(startTime))
+	}()
+
 	flag.Usage = func() {
 		fmt.Print(constants.USAGE)
 	}
@@ -27,22 +33,21 @@ func main() {
 	// 没有任何参数
 	if len(os.Args) == 1 {
 		flag.Usage()
-		os.Exit(0)
+		return
 	}
 
 	// restore flag
 	if *restoreFlag {
 		Restore(textFlag, binFlag)
-		os.Exit(0)
+		return
 	}
 
 	// version flag
 	if *versionFlag {
 		fmt.Printf("v%s\n", constants.VERSION)
-		os.Exit(0)
+		return
 	}
 
 	// no flag
 	Convert(dataurlFlag, printFlag, binFlag)
-	os.Exit(0)
 }

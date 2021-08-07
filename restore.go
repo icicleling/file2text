@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"io"
 	"log"
 	"os"
 	"regexp"
@@ -12,55 +13,86 @@ import (
 )
 
 func Restore(textFlag *string, binFlag *bool) {
-	originStr := ""
-	filePath := "./output"
-	resultByte := make([]byte, 0)
+	originPathStr := flag.Arg(0)
+	targetPathStr := "./output"
 
 	if *textFlag != "" {
-		originStr = *textFlag
 		if flag.Arg(0) != "" {
-			filePath = flag.Arg(0)
+			targetPathStr = flag.Arg(0)
 		}
 	} else {
-		pathStr := flag.Arg(0)
-		byteArr, err := os.ReadFile(pathStr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		originStr = string(byteArr)
-
 		if flag.Arg(1) != "" {
-			filePath = flag.Arg(1)
+			targetPathStr = flag.Arg(1)
 		} else {
 			reg := regexp.MustCompile(`([^/\\\n]+)(?:\.[^/\\\n]+$)|([^/\\][^/\\\n.]+$)`)
-			matchArr := reg.FindStringSubmatch(pathStr)
+			matchArr := reg.FindStringSubmatch(originPathStr)
 			hasExt := matchArr[1]
 			noExt := matchArr[2]
 			if hasExt != "" {
-				filePath = "./" + hasExt
+				targetPathStr = "./" + hasExt
 			} else if noExt != "" {
-				filePath = "./" + noExt
+				targetPathStr = "./" + noExt
 			}
 		}
 	}
 
 	if *binFlag {
+		originStr := *textFlag
+		if *textFlag == "" {
+			byteArr, err := os.ReadFile(originPathStr)
+			if err != nil {
+				log.Fatal(err)
+			}
+			originStr = string(byteArr)
+		}
+
 		arr := strings.Split(originStr, " ")
+		resultBytes := make([]byte, 0)
 
 		for i := 0; i < len(arr); i++ {
 			num, err := strconv.ParseUint(arr[i], 2, 8)
 			if err != nil {
 				log.Fatal(err)
 			}
-			resultByte = append(resultByte, byte(num))
+			resultBytes = append(resultBytes, byte(num))
 		}
-	} else {
-		result, err := base64.StdEncoding.DecodeString(originStr)
+		os.WriteFile(targetPathStr, resultBytes, 0666)
+		return
+	}
+
+	if *textFlag != "" {
+		resultBytes, err := base64.StdEncoding.DecodeString(*textFlag)
 		if err != nil {
 			log.Fatal(err)
 		}
-		resultByte = result
+		os.WriteFile(targetPathStr, resultBytes, 0666)
+		return
 	}
 
-	os.WriteFile(filePath, resultByte, 0666)
+	originFile, originFileErr := os.Open(originPathStr)
+	if originFileErr != nil {
+		log.Fatal(originFileErr)
+	}
+	defer originFile.Close()
+
+	targetFile, targetFileErr := os.Create(targetPathStr)
+	if targetFileErr != nil {
+		log.Fatal(targetFileErr)
+	}
+	defer targetFile.Close()
+
+	p := make([]byte, 4*1024)
+	for {
+		n, nErr := originFile.Read(p)
+		if nErr != nil || nErr == io.EOF {
+			break
+		}
+
+		byteArr, byteArrErr := base64.StdEncoding.DecodeString(string(p[:n]))
+		if byteArrErr != nil {
+			log.Fatal(byteArrErr)
+		}
+
+		targetFile.Write(byteArr)
+	}
 }

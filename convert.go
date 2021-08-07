@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/base64"
 	"file2text/util"
 	"fmt"
+	"io"
 	"log"
 	"mime"
 	"os"
@@ -16,7 +18,6 @@ import (
 func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 	originPathStr := flag.Arg(0)
 	targetPathStr := flag.Arg(1)
-	resultStr := ""
 
 	if targetPathStr == "" {
 		reg := regexp.MustCompile(`[^/\\\n]+$`)
@@ -24,6 +25,18 @@ func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 		fileName := matchArr[0]
 		targetPathStr = "./" + fileName + ".txt"
 	}
+
+	targetFile, targetFileErr := os.Create(targetPathStr)
+	if targetFileErr != nil {
+		log.Fatal(targetFileErr)
+	}
+	defer targetFile.Close()
+
+	originFile, originFileErr := os.Open(originPathStr)
+	if originFileErr != nil {
+		log.Fatal(originFileErr)
+	}
+	defer originFile.Close()
 
 	if *binFlag {
 		byteArr, err := util.GetByteByFilePath(originPathStr)
@@ -34,24 +47,36 @@ func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 		for i := 0; i < len(byteArr); i++ {
 			stringBuilder.WriteString(fmt.Sprintf("%b ", byteArr[i]))
 		}
-		resultStr = strings.TrimSpace(stringBuilder.String())
-	} else {
-		base64Str, err := util.GetBase64ByFilePath(originPathStr)
-		if err != nil {
-			log.Fatal(err)
+		resultStr := strings.TrimSpace(stringBuilder.String())
+		if *printFlag {
+			fmt.Println(resultStr)
 		}
-		resultStr = base64Str
-	}
-
-	if *dataUrlFlag && !*binFlag {
-		ext := path.Ext(originPathStr)
-		mimeType := mime.TypeByExtension(ext)
-		resultStr = fmt.Sprintf("data:%s;base64,%s\n", mimeType, resultStr)
-	}
-
-	if *printFlag {
-		fmt.Println(resultStr)
+		os.WriteFile(targetPathStr, []byte(resultStr), 0666)
 		return
 	}
-	os.WriteFile(targetPathStr, []byte(resultStr), 0666)
+
+	if *dataUrlFlag {
+		fmt.Println("dataurl")
+		ext := path.Ext(originPathStr)
+		mimeType := mime.TypeByExtension(ext)
+		targetFile.Write([]byte(fmt.Sprintf("data:%s;base64,", mimeType)))
+	}
+
+	p := make([]byte, 3*1024)
+	for {
+		n, err := originFile.Read(p)
+		if err != nil || err == io.EOF {
+			if *printFlag {
+				fmt.Print("\n")
+			}
+			break
+		}
+
+		if *printFlag {
+			fmt.Print(base64.StdEncoding.EncodeToString(p[:n]))
+			continue
+		}
+
+		targetFile.Write([]byte(base64.StdEncoding.EncodeToString(p[:n])))
+	}
 }
