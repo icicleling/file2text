@@ -26,11 +26,15 @@ func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 		targetPathStr = "./" + fileName + ".txt"
 	}
 
-	targetFile, targetFileErr := os.Create(targetPathStr)
-	if targetFileErr != nil {
-		log.Fatal(targetFileErr)
+	var targetFile *os.File
+	if !*printFlag {
+		targetFileTemp, targetFileErr := os.Create(targetPathStr)
+		if targetFileErr != nil {
+			log.Fatal(targetFileErr)
+		}
+		defer targetFileTemp.Close()
+		targetFile = targetFileTemp
 	}
-	defer targetFile.Close()
 
 	originFile, originFileErr := os.Open(originPathStr)
 	if originFileErr != nil {
@@ -56,10 +60,13 @@ func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 	}
 
 	if *dataUrlFlag {
-		fmt.Println("dataurl")
 		ext := path.Ext(originPathStr)
 		mimeType := mime.TypeByExtension(ext)
-		targetFile.Write([]byte(fmt.Sprintf("data:%s;base64,", mimeType)))
+		if *printFlag {
+			fmt.Printf("data:%s;base64,", mimeType)
+		} else {
+			targetFile.Write([]byte(fmt.Sprintf("data:%s;base64,", mimeType)))
+		}
 	}
 
 	p := make([]byte, 3*1024)
