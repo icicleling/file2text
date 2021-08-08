@@ -36,39 +36,6 @@ func Restore(textFlag *string, binFlag *bool) {
 		}
 	}
 
-	if *binFlag {
-		originStr := *textFlag
-		if *textFlag == "" {
-			byteArr, err := os.ReadFile(originPathStr)
-			if err != nil {
-				log.Fatal(err)
-			}
-			originStr = string(byteArr)
-		}
-
-		arr := strings.Split(originStr, " ")
-		resultBytes := make([]byte, 0)
-
-		for i := 0; i < len(arr); i++ {
-			num, err := strconv.ParseUint(arr[i], 2, 8)
-			if err != nil {
-				log.Fatal(err)
-			}
-			resultBytes = append(resultBytes, byte(num))
-		}
-		os.WriteFile(targetPathStr, resultBytes, 0666)
-		return
-	}
-
-	if *textFlag != "" {
-		resultBytes, err := base64.StdEncoding.DecodeString(*textFlag)
-		if err != nil {
-			log.Fatal(err)
-		}
-		os.WriteFile(targetPathStr, resultBytes, 0666)
-		return
-	}
-
 	originFile, originFileErr := os.Open(originPathStr)
 	if originFileErr != nil {
 		log.Fatal(originFileErr)
@@ -80,6 +47,43 @@ func Restore(textFlag *string, binFlag *bool) {
 		log.Fatal(targetFileErr)
 	}
 	defer targetFile.Close()
+
+	if *binFlag {
+		var reader io.Reader = originFile
+
+		if *textFlag != "" {
+			reader = strings.NewReader(*textFlag)
+		}
+
+		p := make([]byte, 8192)
+		for {
+			n, err := reader.Read(p)
+			if err != nil || err == io.EOF {
+				break
+			}
+
+			pLen := len(p[:n])
+			resultBytes := make([]byte, pLen/8)
+			for i := 0; i < pLen/8; i++ {
+				num, err := strconv.ParseUint(string(p[i*8:i*8+8]), 2, 8)
+				if err != nil {
+					log.Fatal(err)
+				}
+				resultBytes[i] = byte(num)
+			}
+			targetFile.Write(resultBytes)
+		}
+		return
+	}
+
+	if *textFlag != "" {
+		resultBytes, err := base64.StdEncoding.DecodeString(*textFlag)
+		if err != nil {
+			log.Fatal(err)
+		}
+		os.WriteFile(targetPathStr, resultBytes, 0666)
+		return
+	}
 
 	p := make([]byte, 4*1024)
 	for {

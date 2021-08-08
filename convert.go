@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/base64"
-	"file2text/util"
 	"fmt"
 	"io"
 	"log"
@@ -16,6 +15,10 @@ import (
 )
 
 func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
+	if *printFlag {
+		defer fmt.Println()
+	}
+
 	originPathStr := flag.Arg(0)
 	targetPathStr := flag.Arg(1)
 
@@ -26,11 +29,15 @@ func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 		targetPathStr = "./" + fileName + ".txt"
 	}
 
-	targetFile, targetFileErr := os.Create(targetPathStr)
-	if targetFileErr != nil {
-		log.Fatal(targetFileErr)
+	var targetFile *os.File
+	if !*printFlag {
+		targetFileTemp, targetFileErr := os.Create(targetPathStr)
+		if targetFileErr != nil {
+			log.Fatal(targetFileErr)
+		}
+		defer targetFileTemp.Close()
+		targetFile = targetFileTemp
 	}
-	defer targetFile.Close()
 
 	originFile, originFileErr := os.Open(originPathStr)
 	if originFileErr != nil {
@@ -39,36 +46,41 @@ func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 	defer originFile.Close()
 
 	if *binFlag {
-		byteArr, err := util.GetByteByFilePath(originPathStr)
-		if err != nil {
-			log.Fatal(err)
+		p := make([]byte, 8192)
+		for {
+			n, err := originFile.Read(p)
+			if err != nil || err == io.EOF {
+				break
+			}
+
+			pLen := len(p[:n])
+			var stringBuilder strings.Builder
+			for i := 0; i < pLen; i++ {
+				stringBuilder.WriteString(fmt.Sprintf("%0.8b", p[i]))
+			}
+			if *printFlag {
+				fmt.Print(stringBuilder.String())
+				continue
+			}
+			targetFile.WriteString(stringBuilder.String())
 		}
-		var stringBuilder strings.Builder
-		for i := 0; i < len(byteArr); i++ {
-			stringBuilder.WriteString(fmt.Sprintf("%b ", byteArr[i]))
-		}
-		resultStr := strings.TrimSpace(stringBuilder.String())
-		if *printFlag {
-			fmt.Println(resultStr)
-		}
-		os.WriteFile(targetPathStr, []byte(resultStr), 0666)
 		return
 	}
 
 	if *dataUrlFlag {
-		fmt.Println("dataurl")
 		ext := path.Ext(originPathStr)
 		mimeType := mime.TypeByExtension(ext)
-		targetFile.Write([]byte(fmt.Sprintf("data:%s;base64,", mimeType)))
+		if *printFlag {
+			fmt.Printf("data:%s;base64,", mimeType)
+		} else {
+			targetFile.WriteString(fmt.Sprintf("data:%s;base64,", mimeType))
+		}
 	}
 
 	p := make([]byte, 3*1024)
 	for {
 		n, err := originFile.Read(p)
 		if err != nil || err == io.EOF {
-			if *printFlag {
-				fmt.Print("\n")
-			}
 			break
 		}
 
@@ -77,6 +89,6 @@ func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 			continue
 		}
 
-		targetFile.Write([]byte(base64.StdEncoding.EncodeToString(p[:n])))
+		targetFile.WriteString(base64.StdEncoding.EncodeToString(p[:n]))
 	}
 }
