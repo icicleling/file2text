@@ -2,75 +2,68 @@ package main
 
 import (
 	"encoding/base64"
+	"file2text/util"
 	"fmt"
 	"io"
 	"log"
 	"mime"
 	"os"
 	"path"
-	"regexp"
 	"strings"
 
 	flag "github.com/spf13/pflag"
 )
 
-func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
-	if *printFlag {
+func Convert(dataUrlFlag bool, printFlag bool, binFlag bool) {
+	if printFlag {
 		defer fmt.Println()
 	}
 
-	originPathStr := flag.Arg(0)
-	targetPathStr := flag.Arg(1)
+	originFile := os.NewFile(0, "")
+	targetFile := os.NewFile(0, "")
 
-	if targetPathStr == "" {
-		reg := regexp.MustCompile(`[^/\\\n]+$`)
-		matchArr := reg.FindStringSubmatch(originPathStr)
-		fileName := matchArr[0]
-		targetPathStr = "./" + fileName + ".txt"
-	}
-
-	var targetFile *os.File
-	if !*printFlag {
-		targetFileTemp, targetFileErr := os.Create(targetPathStr)
-		if targetFileErr != nil {
-			log.Fatal(targetFileErr)
-		}
-		defer targetFileTemp.Close()
-		targetFile = targetFileTemp
-	}
-
-	originFile, originFileErr := os.Open(originPathStr)
-	if originFileErr != nil {
-		log.Fatal(originFileErr)
-	}
+	setConvertFileVar(originFile, targetFile, printFlag)
 	defer originFile.Close()
+	defer targetFile.Close()
 
-	if *binFlag {
-		p := make([]byte, 8192)
-		for {
-			n, err := originFile.Read(p)
-			if err != nil || err == io.EOF {
-				break
-			}
-
-			pLen := len(p[:n])
-			var stringBuilder strings.Builder
-			for i := 0; i < pLen; i++ {
-				stringBuilder.WriteString(fmt.Sprintf("%0.8b", p[i]))
-			}
-			if *printFlag {
-				fmt.Print(stringBuilder.String())
-				continue
-			}
-			targetFile.WriteString(stringBuilder.String())
-		}
+	if binFlag {
+		convertBinary(originFile, targetFile, printFlag)
 		return
 	}
 
-	if *dataUrlFlag {
-		ext := path.Ext(originPathStr)
+	convertBase64(originFile, targetFile, printFlag, dataUrlFlag)
+}
+
+func convertBinary(originFile *os.File, targetFile *os.File, printFlag bool) {
+	p := make([]byte, 8192)
+	for {
+		n, err := originFile.Read(p)
+		if err != nil || err == io.EOF {
+			break
+		}
+
+		pLen := len(p[:n])
+		var stringBuilder strings.Builder
+		for i := 0; i < pLen; i++ {
+			stringBuilder.WriteString(fmt.Sprintf("%0.8b", p[i]))
+		}
+		if printFlag {
+			fmt.Print(stringBuilder.String())
+			continue
+		}
+		targetFile.WriteString(stringBuilder.String())
+	}
+}
+
+func convertBase64(originFile *os.File, targetFile *os.File, printFlag bool, dataUrlFlag bool) {
+	if dataUrlFlag {
+		fileinfo, err := originFile.Stat()
+		if err != nil {
+			log.Fatal(err)
+		}
+		ext := path.Ext(fileinfo.Name())
 		mimeType := mime.TypeByExtension(ext)
-		if *printFlag {
+		if printFlag {
 			fmt.Printf("data:%s;base64,", mimeType)
 		} else {
 			targetFile.WriteString(fmt.Sprintf("data:%s;base64,", mimeType))
@@ -84,11 +77,34 @@ func Convert(dataUrlFlag *bool, printFlag *bool, binFlag *bool) {
 			break
 		}
 
-		if *printFlag {
+		if printFlag {
 			fmt.Print(base64.StdEncoding.EncodeToString(p[:n]))
 			continue
 		}
 
 		targetFile.WriteString(base64.StdEncoding.EncodeToString(p[:n]))
+	}
+}
+
+func setConvertFileVar(originFile *os.File, targetFile *os.File, printFlag bool) {
+	originPathStr := flag.Arg(0)
+	targetPathStr := flag.Arg(1)
+
+	originFileT, originFileErr := os.Open(originPathStr)
+	if originFileErr != nil {
+		log.Fatal(originFileErr)
+	}
+	*originFile = *originFileT
+
+	if targetPathStr == "" {
+		targetPathStr = util.GetPathAppendExt(originPathStr)
+	}
+
+	if !printFlag {
+		targetFileT, targetFileErr := os.Create(targetPathStr)
+		if targetFileErr != nil {
+			log.Fatal(targetFileErr)
+		}
+		*targetFile = *targetFileT
 	}
 }

@@ -38,7 +38,7 @@ func main() {
 
 	// restore flag
 	if *restoreFlag {
-		Restore(textFlag, binFlag)
+		Restore(*textFlag, *binFlag)
 		return
 	}
 
@@ -49,5 +49,5 @@ func main() {
 	}
 
 	// no flag
-	Convert(dataurlFlag, printFlag, binFlag)
+	Convert(*dataurlFlag, *printFlag, *binFlag)
 }
