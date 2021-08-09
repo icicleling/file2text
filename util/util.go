@@ -1,25 +1,22 @@
 package util
 
-import (
-	"encoding/base64"
-	"os"
-)
+import "regexp"
 
-// 读取路径文件, 返回base64字符串
-func GetBase64ByFilePath(pathStr string) (string, error) {
-	byte, err := os.ReadFile(pathStr)
-	if err != nil {
-		return "", err
-	}
-	base64Str := base64.StdEncoding.EncodeToString(byte)
-	return base64Str, nil
+func GetPathAppendExt(originPath string) string {
+	reg := regexp.MustCompile(`[^/\\\n]+$`)
+	matchArr := reg.FindStringSubmatch(originPath)
+	fileName := matchArr[0]
+	return "./" + fileName + ".txt"
 }
 
-// 读取路径文件, 返回byte
-func GetByteByFilePath(pathStr string) ([]byte, error) {
-	byte, err := os.ReadFile(pathStr)
-	if err != nil {
-		return nil, err
+func GetPathRemoveExt(originPath string) string {
+	reg := regexp.MustCompile(`([^/\\\n]+)(?:\.[^/\\\n]+$)|([^/\\][^/\\\n.]+$)`)
+	matchArr := reg.FindStringSubmatch(originPath)
+	hasExt := matchArr[1]
+	noExt := matchArr[2]
+
+	if hasExt != "" {
+		return "./" + hasExt
 	}
-	return byte, nil
+	return "./" + noExt
 }

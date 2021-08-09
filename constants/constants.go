@@ -24,4 +24,4 @@ const USAGE = `
 `
 
 // VERSION 版本号
-const VERSION = "0.11"
+const VERSION = "0.12"

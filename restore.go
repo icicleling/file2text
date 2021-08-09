@@ -2,65 +2,110 @@ package main
 
 import (
 	"encoding/base64"
+	"file2text/util"
+	"io"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
 	flag "github.com/spf13/pflag"
 )
 
-func Restore(textFlag *string, binFlag *bool) {
-	originStr := ""
-	filePath := "./output"
-	resultByte := make([]byte, 0)
+func Restore(textFlag string, binFlag bool) {
+	originFile := os.NewFile(0, "")
+	targetFile := os.NewFile(0, "")
 
-	if *textFlag != "" {
-		originStr = *textFlag
-		if flag.Arg(0) != "" {
-			filePath = flag.Arg(0)
-		}
-	} else {
-		pathStr := flag.Arg(0)
-		byteArr, err := os.ReadFile(pathStr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		originStr = string(byteArr)
+	setRestoreFileVar(originFile, targetFile, textFlag)
+	defer originFile.Close()
+	defer targetFile.Close()
 
-		if flag.Arg(1) != "" {
-			filePath = flag.Arg(1)
-		} else {
-			reg := regexp.MustCompile(`([^/\\\n]+)(?:\.[^/\\\n]+$)|([^/\\][^/\\\n.]+$)`)
-			matchArr := reg.FindStringSubmatch(pathStr)
-			hasExt := matchArr[1]
-			noExt := matchArr[2]
-			if hasExt != "" {
-				filePath = "./" + hasExt
-			} else if noExt != "" {
-				filePath = "./" + noExt
-			}
-		}
+	if binFlag {
+		restoreBinary(originFile, targetFile, textFlag)
+		return
 	}
 
-	if *binFlag {
-		arr := strings.Split(originStr, " ")
+	restoreBase64(originFile, targetFile, textFlag)
+}
 
-		for i := 0; i < len(arr); i++ {
-			num, err := strconv.ParseUint(arr[i], 2, 8)
+func restoreBinary(originFile *os.File, targetFile *os.File, textFlag string) {
+	var reader io.Reader = originFile
+
+	if textFlag != "" {
+		reader = strings.NewReader(textFlag)
+	}
+
+	p := make([]byte, 8192)
+	for {
+		n, err := reader.Read(p)
+		if err != nil || err == io.EOF {
+			break
+		}
+
+		pLen := len(p[:n])
+		resultBytes := make([]byte, pLen/8)
+		for i := 0; i < pLen/8; i++ {
+			num, err := strconv.ParseUint(string(p[i*8:i*8+8]), 2, 8)
 			if err != nil {
 				log.Fatal(err)
 			}
-			resultByte = append(resultByte, byte(num))
+			resultBytes[i] = byte(num)
 		}
-	} else {
-		result, err := base64.StdEncoding.DecodeString(originStr)
+		targetFile.Write(resultBytes)
+	}
+}
+
+func restoreBase64(originFile *os.File, targetFile *os.File, textFlag string) {
+	if textFlag != "" {
+		resultBytes, err := base64.StdEncoding.DecodeString(textFlag)
 		if err != nil {
 			log.Fatal(err)
 		}
-		resultByte = result
+		targetFile.Write(resultBytes)
+		return
 	}
 
-	os.WriteFile(filePath, resultByte, 0666)
+	p := make([]byte, 4*1024)
+	for {
+		n, nErr := originFile.Read(p)
+		if nErr != nil || nErr == io.EOF {
+			break
+		}
+
+		byteArr, byteArrErr := base64.StdEncoding.DecodeString(string(p[:n]))
+		if byteArrErr != nil {
+			log.Fatal(byteArrErr)
+		}
+
+		targetFile.Write(byteArr)
+	}
+}
+
+func setRestoreFileVar(originFile *os.File, targetFile *os.File, textFlag string) {
+	targetFilePath := "./output"
+	if textFlag != "" {
+		if flag.Arg(0) != "" {
+			targetFilePath = flag.Arg(0)
+		}
+	} else {
+		// origin file
+		originPathStr := flag.Arg(0)
+		originFileTemp, originFileErr := os.Open(originPathStr)
+		if originFileErr != nil {
+			log.Fatal(originFileErr)
+		}
+		*originFile = *originFileTemp
+
+		// target file
+		if flag.Arg(1) != "" {
+			targetFilePath = flag.Arg(1)
+		} else {
+			targetFilePath = util.GetPathRemoveExt(originPathStr)
+		}
+	}
+	targetFileTemp, err := os.Create(targetFilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	*targetFile = *targetFileTemp
 }
